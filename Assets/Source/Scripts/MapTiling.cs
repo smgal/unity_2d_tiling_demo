@@ -5,9 +5,13 @@ using Lean;
 
 public class MapTiling: MonoBehaviour
 {
+	public GameObject parent;
+	public GameObject anchor;
 	public GameObject prefabTileContainer;
 	public GameObject prefabTile;
 	public Sprite tempSprite;
+	public float offsetX = 0.0f;
+	public float offsetY = 0.0f;
 
 	// map renderer
 	private GameObject _tileContainer;
@@ -15,8 +19,25 @@ public class MapTiling: MonoBehaviour
 
 	void Start()
 	{
+		float VIEW_W = anchor.GetComponent<RectTransform>().rect.width * 2;
+		float VIEW_H = anchor.GetComponent<RectTransform>().rect.height * 2;
+
+		float TILE_W = 24;
+		float TILE_H = 24;
+
+		// Anchor의 중심
+		offsetX = VIEW_W / 2;
+		offsetY = -VIEW_H / 2;
+
+		Vector3 scale = prefabTile.transform.localScale;
+		// 2000.0f / 24.0f 이면 전체 크기
+		// (256.0f / 24.0f) 전체 가로에 들어가는 타일 개수
+		scale.x = VIEW_W / TILE_W / (256.0f / TILE_W);
+		scale.y = VIEW_H / TILE_H / (256.0f / TILE_H);
+
+		prefabTile.transform.localScale = scale;
 	}
-	
+
 	void Update()
 	{
 		DisplayMainMap();
@@ -32,11 +53,15 @@ public class MapTiling: MonoBehaviour
 		_tiles.Clear();
 
 		LeanPool.Despawn(_tileContainer);
+
+		float ANCHOR_X = anchor.transform.position.x;
+		float ANCHOR_Y = anchor.transform.position.y;
+
 		_tileContainer = LeanPool.Spawn(prefabTileContainer);
 
 		{
-			float x = 100.0f;
-			float y = 100.0f;
+			float x = ANCHOR_X + offsetX;
+			float y = ANCHOR_Y + offsetY;
 			float z = 0.0f;
 
 			var t = LeanPool.Spawn(prefabTile);
