@@ -19,20 +19,35 @@ public class GridRenderer: MonoBehaviour
 	private List<GameObject> _tiles = new List<GameObject>();
 	private List<SpriteRenderer> _tile_renderer = new List<SpriteRenderer>();
 
-	////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	// 상수 정의
 
+	// 실제 표시되는
 	private const int NUM_TILES_X_RADIUS = 4;
 	private const int NUM_TILES_Y_RADIUS = 4;
+	// 실제 출력하는
+	private const int NUM_TILES_X_EXTENDED = (NUM_TILES_X_RADIUS + 1);
+	private const int NUM_TILES_Y_EXTENDED = (NUM_TILES_Y_RADIUS + 1);
 
 	private const float TILE_W = 48;
 	private const float TILE_H = 48;
 
+	private const float _SPEED = 500.0f;
 	private Vector3 _SCALE;
+
+	private Vector3 _grid_pos;
+	private Transform _grid_tr;
+
+	///////////////////////////////////////////////////////////////////////////////
+	// 다른 곳에 정의 되어야 함
+
+	//private int[,] _map = new int[50, 50];
+	private Player _player = new Player();
+	private Map _map = null;
 
 	// Use this for initialization
 	void Start()
 	{
-
 		Debug.Assert((anchor.transform as RectTransform).pivot.x == 0.5);
 		Debug.Assert((anchor.transform as RectTransform).pivot.y == 0.5);
 
@@ -81,9 +96,9 @@ public class GridRenderer: MonoBehaviour
 
 			float z = 0.0f;
 
-			for (int dy = -NUM_TILES_Y_RADIUS-1; dy <= NUM_TILES_Y_RADIUS+1; dy++)
+			for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 			{
-				for (int dx = -NUM_TILES_X_RADIUS-1; dx <= NUM_TILES_X_RADIUS+1; dx++)
+				for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
 				{
 					float x = VIEW_CENTER.x + dx * TILE_SCALE.x;
 					float y = VIEW_CENTER.y - dy * TILE_SCALE.y;
@@ -108,9 +123,11 @@ public class GridRenderer: MonoBehaviour
 		_tile_renderer[2].sprite = sprite_list[33];
 
 		{
+			_map = new Map(new nd.Size { w = 50, h = 50 });
+
 			int count = 0;
-			for (int y = 0; y < 50; y++)
-			for (int x = 0; x < 50; x++)
+			for (int y = 0; y < _map.Size.h; y++)
+			for (int x = 0; x < _map.Size.w; x++)
 			{
 				_map[x, y] = count++ % 100;
 			}
@@ -133,77 +150,50 @@ public class GridRenderer: MonoBehaviour
 
 	private void _UpdateGrid()
 	{
-		for (int dy = -5; dy <= 5; dy++)
-		for (int dx = -5; dx <= 5; dx++)
+		int _party_x = _player.Pos.x;
+		int _party_y = _player.Pos.y;
+
+		for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
+		for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
 		{
 			_tile_renderer[_GetGridIndex(dx, dy)].sprite = sprite_list[_map[_party_x + dx, _party_y + dy]];
 		}
 	}
 
-
-	private const float _SPEED = 500.0f;
-
-	private Vector3 _grid_pos;
-	private Transform _grid_tr;
-
-	private bool _is_left_key_down = false;
-	private bool _is_right_key_down = false;
-	private bool _is_up_key_down = false;
-	private bool _is_down_key_down = false;
-
-	private int[,] _map = new int[50, 50];
-	private int _party_x = 25;
-	private int _party_y = 25;
-	private int _party_dx = 0;
-	private int _party_dy = 0;
-
 	void Update()
 	{
+		if (_grid_tr.position == _grid_pos)
 		{
-			if (Input.GetKeyDown(KeyCode.RightArrow))
-				_is_right_key_down = true;
-			if (Input.GetKeyUp(KeyCode.RightArrow))
-				_is_right_key_down = false;
+			int _party_dx = 0;
+			int _party_dy = 0;
 
-			if (Input.GetKeyDown(KeyCode.LeftArrow))
-				_is_left_key_down = true;
-			if (Input.GetKeyUp(KeyCode.LeftArrow))
-				_is_left_key_down = false;
+			if (InputDevice.IsKeyPressing(InputDevice.KEY.RIGHT))
+			{
+				//_player_anim.SetTrigger("PlayerTurnsRight");
+				_grid_pos += new Vector3(-TILE_H * _SCALE.y, 0.0f);
+				_party_dx = 1;
+			}
+			else if (InputDevice.IsKeyPressing(InputDevice.KEY.LEFT))
+			{
+				//_player_anim.SetTrigger("PlayerTurnsLeft");
+				_grid_pos += new Vector3(+TILE_H * _SCALE.y, 0.0f);
+				_party_dx = -1;
+			}
+			else if (InputDevice.IsKeyPressing(InputDevice.KEY.UP))
+			{
+				//_player_anim.SetTrigger("PlayerTurnsUp");
+				_grid_pos += new Vector3(0.0f, -TILE_H * _SCALE.x);
+				_party_dy = -1;
+			}
+			else if (InputDevice.IsKeyPressing(InputDevice.KEY.DOWN))
+			{
+				//_player_anim.SetTrigger("PlayerTurnsDown");
+				_grid_pos += new Vector3(0.0f, +TILE_H * _SCALE.x);
+				_party_dy = 1;
+			}
 
-			if (Input.GetKeyDown(KeyCode.UpArrow))
-				_is_up_key_down = true;
-			if (Input.GetKeyUp(KeyCode.UpArrow))
-				_is_up_key_down = false;
-
-			if (Input.GetKeyDown(KeyCode.DownArrow))
-				_is_down_key_down = true;
-			if (Input.GetKeyUp(KeyCode.DownArrow))
-				_is_down_key_down = false;
-		}
-
-		if (_is_right_key_down && _grid_tr.position == _grid_pos)
-		{
-			//_player_anim.SetTrigger("PlayerTurnsRight");
-			_grid_pos += new Vector3(-TILE_H * _SCALE.y, 0.0f);
-			_party_dx = 1;
-		}
-		else if (_is_left_key_down && _grid_tr.position == _grid_pos)
-		{
-			//_player_anim.SetTrigger("PlayerTurnsLeft");
-			_grid_pos += new Vector3(+TILE_H * _SCALE.y, 0.0f);
-			_party_dx = -1;
-		}
-		else if (_is_up_key_down && _grid_tr.position == _grid_pos)
-		{
-			//_player_anim.SetTrigger("PlayerTurnsUp");
-			_grid_pos += new Vector3(0.0f, -TILE_H * _SCALE.x);
-			_party_dy = -1;
-		}
-		else if (_is_down_key_down && _grid_tr.position == _grid_pos)
-		{
-			//_player_anim.SetTrigger("PlayerTurnsDown");
-			_grid_pos += new Vector3(0.0f, +TILE_H * _SCALE.x);
-			_party_dy = 1;
+			if (_party_dx != 0 || _party_dy != 0)
+				_player.SetDiretion(_party_dx, _party_dy);
 		}
 
 		if (_grid_tr.position != _grid_pos)
@@ -214,11 +204,7 @@ public class GridRenderer: MonoBehaviour
 			{
 				_grid_tr.position = _grid_pos = Vector3.zero;
 
-				_party_x += _party_dx;
-				_party_y += _party_dy;
-
-				_party_dx = 0;
-				_party_dy = 0;
+				_player.Move(_player.Diretion);
 
 				_UpdateGrid();
 			}

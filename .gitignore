@@ -81,5 +81,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # Others
-/Packages
-/.svn
+/Packages/
+/.svn/
+/_RootResources/
+/Assets/ExternalLibEx/
+/Assets/ExternalLibEx.meta

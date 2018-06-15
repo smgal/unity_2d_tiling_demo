@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class zMainLoop : MonoBehaviour
+public class MainLoop : MonoBehaviour
 {
 	public Text text_debug_fps;
 
@@ -20,6 +20,8 @@ public class zMainLoop : MonoBehaviour
 	void Update ()
 	{
 		_DisplayDebugFps();
+
+		Controller.Process();
 	}
 
 	void OnApplicationQuit()
