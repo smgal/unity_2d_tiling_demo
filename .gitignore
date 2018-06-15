@@ -79,4 +79,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Others
 /Packages
+/.svn
