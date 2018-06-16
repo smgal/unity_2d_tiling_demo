@@ -83,6 +83,7 @@ $RECYCLE.BIN/
 # Others
 /Packages/
 /.svn/
+/.vs/
 /_RootResources/
 /Assets/ExternalLibEx/
 /Assets/ExternalLibEx.meta
