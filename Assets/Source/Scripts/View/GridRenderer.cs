@@ -11,14 +11,17 @@ public class GridRenderer: MonoBehaviour
 	public GameObject player;
 	public Animator   player_anim;
 	public GameObject prefab_tile_container;
-	public GameObject prefab_tile;
+	public GameObject prefab_bg_tile;
+	public GameObject prefab_obj_tile;
+	public GameObject prefab_fg_tile;
 
 	public List<Sprite> sprite_list;
 
 	// map renderer
+	private const int _MAX_LAYER = 3;
 	private GameObject _tile_container;
 	private List<GameObject> _tiles = new List<GameObject>();
-	private List<SpriteRenderer>[] _tile_renderer = new List<SpriteRenderer>[2] { new List<SpriteRenderer>(), new List<SpriteRenderer>() } ;
+	private List<SpriteRenderer>[] _tile_renderer = new List<SpriteRenderer>[_MAX_LAYER] { new List<SpriteRenderer>(), new List<SpriteRenderer>(), new List<SpriteRenderer>() } ;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// 상수 정의
@@ -33,18 +36,11 @@ public class GridRenderer: MonoBehaviour
 	private const float TILE_W = 48;
 	private const float TILE_H = 48;
 
-	private const float _SPEED = 500.0f;
+	private const float _SPEED = 1000.0f;
 	private Vector3 _SCALE;
 
 	private Vector3 _grid_pos;
 	private Transform _grid_tr;
-
-	///////////////////////////////////////////////////////////////////////////////
-	// 다른 곳에 정의 되어야 함
-
-	//private int[,] _map = new int[50, 50];
-	private Player _player = new Player();
-	private Map _map = null;
 
 	// Use this for initialization
 	void Start()
@@ -74,12 +70,15 @@ public class GridRenderer: MonoBehaviour
 		);
 
 		{
-			prefab_tile.transform.localScale = _SCALE;
+			prefab_bg_tile.transform.localScale = _SCALE;
+			prefab_obj_tile.transform.localScale = _SCALE;
+			prefab_fg_tile.transform.localScale = _SCALE;
 		}
 
 		{
 			Vector3 pos = anchor.transform.position;
 			pos.z = player.transform.position.z;
+			pos.y += 100;
 			player.transform.position = pos;
 
 			player.transform.localScale = _SCALE;
@@ -95,10 +94,16 @@ public class GridRenderer: MonoBehaviour
 				TILE_H * _SCALE.y
 			);
 
-			float z = 1.0f;
+			const float Z_INIT = 1.0f;
+			const float Z_GAP_LAYER = -0.2f;
+			const float Z_GAP_VERTICAL = -0.01f;
 
-			for (int layer = 0; layer < 2; layer++)
+			for (int layer = 0; layer < _MAX_LAYER; layer++)
 			{
+				GameObject prefab_tile = (layer == 0) ? prefab_bg_tile : ((layer == 1) ? prefab_obj_tile : prefab_fg_tile);
+
+				float z = Z_INIT + Z_GAP_LAYER * layer;
+
 				for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 				{
 					for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
@@ -116,29 +121,16 @@ public class GridRenderer: MonoBehaviour
 						_tiles.Add(tile);
 						_tile_renderer[layer].Add(renderer);
 					}
+
+					z += Z_GAP_VERTICAL;
 				}
-				z -= 0.1f;
 			}
 		}
 
 		_grid_tr = _tile_container.transform;
 		_grid_pos = _tile_container.transform.position;
 
-		{
-		/*
-			_map = new Map(new nd.type.Size { w = 50, h = 50 });
-
-			int count = 0;
-			for (int y = 0; y < _map.Size.h; y++)
-			for (int x = 0; x < _map.Size.w; x++)
-			{
-				_map[x, y] = count++ % 100;
-			}
-		*/
-			nd.map.Load("TEST", "Map001", ref _map);
-
-			_UpdateGrid();
-		}
+		_UpdateGrid();
 	}
 
 	private int _GetGridIndex(int dx, int dy)
@@ -155,17 +147,33 @@ public class GridRenderer: MonoBehaviour
 
 	private void _UpdateGrid()
 	{
-		int _party_x = _player.Pos.x;
-		int _party_y = _player.Pos.y;
+		int _party_x = GameObj.player.Pos.x;
+		int _party_y = GameObj.player.Pos.y;
 
 		for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 		for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
 		{
-			int ix = _map[_party_x + dx, _party_y + dy];
+			int ix = GameObj.map[_party_x + dx, _party_y + dy];
 			int ix_tile = ix & 0xFFFF;
 			int ix_sprite = (ix >> 16) & 0xFFFF;
-			_tile_renderer[0][_GetGridIndex(dx, dy)].sprite = sprite_list[ix_tile];
-			_tile_renderer[1][_GetGridIndex(dx, dy)].sprite = (ix_sprite > 0) ? sprite_list[128 + ix_sprite] : null;
+
+			int[] ix_layer = new int[_MAX_LAYER] { -1, -1, -1 };
+
+			if (ix_tile == 93 || ix_tile == 94 || ix_tile == 95)
+				ix_layer[2] = ix_tile;
+			else
+				ix_layer[0] = ix_tile;
+
+			if (ix_sprite > 0)
+			{
+				if (ix_sprite == 73)
+					ix_layer[2] = 128 + ix_sprite;
+				else
+					ix_layer[1] = 128 + ix_sprite;
+			}
+
+			for (int layer = 0; layer < _MAX_LAYER; layer++)
+				_tile_renderer[layer][_GetGridIndex(dx, dy)].sprite = (ix_layer[layer] >= 0) ? sprite_list[ix_layer[layer]] : null;
 		}
 	}
 
@@ -178,31 +186,37 @@ public class GridRenderer: MonoBehaviour
 
 			if (InputDevice.IsKeyPressing(InputDevice.KEY.RIGHT))
 			{
-				player_anim.SetTrigger("PlayerTurnsRight");
 				_grid_pos += new Vector3(-TILE_H * _SCALE.y, 0.0f);
 				_party_dx = 1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.LEFT))
 			{
-				player_anim.SetTrigger("PlayerTurnsLeft");
 				_grid_pos += new Vector3(+TILE_H * _SCALE.y, 0.0f);
 				_party_dx = -1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.UP))
 			{
-				player_anim.SetTrigger("PlayerTurnsUp");
 				_grid_pos += new Vector3(0.0f, -TILE_H * _SCALE.x);
 				_party_dy = -1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.DOWN))
 			{
-				player_anim.SetTrigger("PlayerTurnsDown");
 				_grid_pos += new Vector3(0.0f, +TILE_H * _SCALE.x);
 				_party_dy = 1;
 			}
 
 			if (_party_dx != 0 || _party_dy != 0)
-				_player.SetDiretion(_party_dx, _party_dy);
+			{
+				if (GameObj.player.Diretion.dx != _party_dx || GameObj.player.Diretion.dy != _party_dy)
+				{
+					if (_party_dy != 0)
+						player_anim.SetTrigger((_party_dy >= 0) ? "PlayerTurnsDown" : "PlayerTurnsUp");
+					else
+						player_anim.SetTrigger((_party_dx >= 0) ? "PlayerTurnsRight" : "PlayerTurnsLeft");
+				}
+
+				GameObj.player.SetDiretion(_party_dx, _party_dy);
+			}
 		}
 
 		if (_grid_tr.position != _grid_pos)
@@ -213,7 +227,7 @@ public class GridRenderer: MonoBehaviour
 			{
 				_grid_tr.position = _grid_pos = Vector3.zero;
 
-				_player.Move(_player.Diretion);
+				GameObj.player.Move(GameObj.player.Diretion);
 
 				_UpdateGrid();
 			}

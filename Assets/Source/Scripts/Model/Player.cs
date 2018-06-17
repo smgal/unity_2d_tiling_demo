@@ -45,4 +45,10 @@ public class Player
 	{
 		this.Move(dir.dx, dir.dy);
 	}
+
+	public void Warp(int x, int y)
+	{
+		_pos.x = x;
+		_pos.y = y;
+	}
 }

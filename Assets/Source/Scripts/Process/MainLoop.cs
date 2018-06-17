@@ -7,21 +7,36 @@ using UnityEngine.UI;
 public class MainLoop : MonoBehaviour
 {
 	public Text text_debug_fps;
+	public Text text_debug_pos;
+	public Text text_debug_log;
 
 	void Awake()
 	{
 		// DontDestroyOnLoad(...gameObject);
 	}
 
-	void Start ()
+	void Start()
 	{
 	}
 	
-	void Update ()
+	void Update()
 	{
 		_DisplayDebugFps();
 
 		Controller.Process();
+
+		{
+			int party_x = GameObj.player.Pos.x;
+			int party_y = GameObj.player.Pos.y;
+
+			text_debug_pos.text = String.Format("({0:D2},{1:D2})", party_x, party_y);
+
+			int ix = GameObj.map[party_x, party_y];
+			int ix_tile = ix & 0xFFFF;
+			int ix_sprite = (ix >> 16) & 0xFFFF;
+
+			text_debug_log.text = String.Format("tile: {0}, sprite: {1}", ix_tile, ix_sprite);
+		}
 	}
 
 	void OnApplicationQuit()
