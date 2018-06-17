@@ -3,18 +3,18 @@ using System;
 
 public class Player
 {
-	private nd.Pos _pos;
-	private nd.Dir _faced;
+	private nd.type.Pos _pos;
+	private nd.type.Dir _faced;
 
 	public Player()
 	{
-		_pos.x = 25;
-		_pos.y = 25;
+		_pos.x = 10;
+		_pos.y = 10;
 		_faced.dx = 0;
 		_faced.dy = 1;
 	}
 
-	public nd.Dir Diretion
+	public nd.type.Dir Diretion
 	{
 		get { return _faced; }
 	}
@@ -25,12 +25,12 @@ public class Player
 		_faced.dy = dy;
 	}
 
-	public void SetDiretion(nd.Dir faced)
+	public void SetDiretion(nd.type.Dir faced)
 	{
 		this.SetDiretion(faced.dx, faced.dy);
 	}
 
-	public nd.Pos Pos
+	public nd.type.Pos Pos
 	{
 		get { return _pos; }
 	}
@@ -41,7 +41,7 @@ public class Player
 		_pos.y += dy;
 	}
 
-	public void Move(nd.Dir dir)
+	public void Move(nd.type.Dir dir)
 	{
 		this.Move(dir.dx, dir.dy);
 	}

@@ -9,6 +9,7 @@ public class GridRenderer: MonoBehaviour
 {
 	public GameObject anchor;
 	public GameObject player;
+	public Animator   player_anim;
 	public GameObject prefab_tile_container;
 	public GameObject prefab_tile;
 
@@ -17,7 +18,7 @@ public class GridRenderer: MonoBehaviour
 	// map renderer
 	private GameObject _tile_container;
 	private List<GameObject> _tiles = new List<GameObject>();
-	private List<SpriteRenderer> _tile_renderer = new List<SpriteRenderer>();
+	private List<SpriteRenderer>[] _tile_renderer = new List<SpriteRenderer>[2] { new List<SpriteRenderer>(), new List<SpriteRenderer>() } ;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// 상수 정의
@@ -94,36 +95,38 @@ public class GridRenderer: MonoBehaviour
 				TILE_H * _SCALE.y
 			);
 
-			float z = 0.0f;
+			float z = 1.0f;
 
-			for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
+			for (int layer = 0; layer < 2; layer++)
 			{
-				for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
+				for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 				{
-					float x = VIEW_CENTER.x + dx * TILE_SCALE.x;
-					float y = VIEW_CENTER.y - dy * TILE_SCALE.y;
+					for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
+					{
+						float x = VIEW_CENTER.x + dx * TILE_SCALE.x;
+						float y = VIEW_CENTER.y - dy * TILE_SCALE.y;
 
-					var tile = LeanPool.Spawn(prefab_tile);
-					tile.transform.position = new Vector3(x, y, z);
-					tile.transform.SetParent(_tile_container.transform);
+						var tile = LeanPool.Spawn(prefab_tile);
+						tile.transform.position = new Vector3(x, y, z);
+						tile.transform.SetParent(_tile_container.transform);
 
-					var renderer = tile.GetComponent<SpriteRenderer>();
-					renderer.sprite = sprite_list[0];
+						var renderer = tile.GetComponent<SpriteRenderer>();
+						renderer.sprite = sprite_list[0];
 
-					_tiles.Add(tile);
-					_tile_renderer.Add(renderer);
+						_tiles.Add(tile);
+						_tile_renderer[layer].Add(renderer);
+					}
 				}
+				z -= 0.1f;
 			}
 		}
 
 		_grid_tr = _tile_container.transform;
 		_grid_pos = _tile_container.transform.position;
 
-		_tile_renderer[0].sprite = sprite_list[22];
-		_tile_renderer[2].sprite = sprite_list[33];
-
 		{
-			_map = new Map(new nd.Size { w = 50, h = 50 });
+		/*
+			_map = new Map(new nd.type.Size { w = 50, h = 50 });
 
 			int count = 0;
 			for (int y = 0; y < _map.Size.h; y++)
@@ -131,6 +134,8 @@ public class GridRenderer: MonoBehaviour
 			{
 				_map[x, y] = count++ % 100;
 			}
+		*/
+			nd.map.Load("TEST", "Map001", ref _map);
 
 			_UpdateGrid();
 		}
@@ -156,7 +161,11 @@ public class GridRenderer: MonoBehaviour
 		for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 		for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
 		{
-			_tile_renderer[_GetGridIndex(dx, dy)].sprite = sprite_list[_map[_party_x + dx, _party_y + dy]];
+			int ix = _map[_party_x + dx, _party_y + dy];
+			int ix_tile = ix & 0xFFFF;
+			int ix_sprite = (ix >> 16) & 0xFFFF;
+			_tile_renderer[0][_GetGridIndex(dx, dy)].sprite = sprite_list[ix_tile];
+			_tile_renderer[1][_GetGridIndex(dx, dy)].sprite = (ix_sprite > 0) ? sprite_list[128 + ix_sprite] : null;
 		}
 	}
 
@@ -169,25 +178,25 @@ public class GridRenderer: MonoBehaviour
 
 			if (InputDevice.IsKeyPressing(InputDevice.KEY.RIGHT))
 			{
-				//_player_anim.SetTrigger("PlayerTurnsRight");
+				player_anim.SetTrigger("PlayerTurnsRight");
 				_grid_pos += new Vector3(-TILE_H * _SCALE.y, 0.0f);
 				_party_dx = 1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.LEFT))
 			{
-				//_player_anim.SetTrigger("PlayerTurnsLeft");
+				player_anim.SetTrigger("PlayerTurnsLeft");
 				_grid_pos += new Vector3(+TILE_H * _SCALE.y, 0.0f);
 				_party_dx = -1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.UP))
 			{
-				//_player_anim.SetTrigger("PlayerTurnsUp");
+				player_anim.SetTrigger("PlayerTurnsUp");
 				_grid_pos += new Vector3(0.0f, -TILE_H * _SCALE.x);
 				_party_dy = -1;
 			}
 			else if (InputDevice.IsKeyPressing(InputDevice.KEY.DOWN))
 			{
-				//_player_anim.SetTrigger("PlayerTurnsDown");
+				player_anim.SetTrigger("PlayerTurnsDown");
 				_grid_pos += new Vector3(0.0f, +TILE_H * _SCALE.x);
 				_party_dy = 1;
 			}
