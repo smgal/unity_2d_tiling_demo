@@ -69,7 +69,7 @@ public class MainLoop : MonoBehaviour
 			int fps_current_second = (int)Time.realtimeSinceStartup;
 			if (fps_current_second > _fps_prev_second)
 			{
-				text_debug_fps.text = String.Format("{0:F1}", 1.0f * _fps_count / (fps_current_second - _fps_prev_second));
+				text_debug_fps.text = String.Format("FPS: {0:F1}", 1.0f * _fps_count / (fps_current_second - _fps_prev_second));
 				_fps_prev_second = fps_current_second;
 				_fps_count = 0;
 			}

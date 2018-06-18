@@ -1,8 +1,9 @@
 ﻿
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public static class InputDevice
+public class InputDevice: MonoBehaviour
 {
 	public enum KEY
 	{

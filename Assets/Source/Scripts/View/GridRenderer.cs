@@ -78,7 +78,7 @@ public class GridRenderer: MonoBehaviour
 		{
 			Vector3 pos = anchor.transform.position;
 			pos.z = player.transform.position.z;
-			pos.y += 100;
+			pos.y += 60;
 			player.transform.position = pos;
 
 			player.transform.localScale = _SCALE;
@@ -159,19 +159,23 @@ public class GridRenderer: MonoBehaviour
 
 			int[] ix_layer = new int[_MAX_LAYER] { -1, -1, -1 };
 
-			if (ix_tile == 93 || ix_tile == 94 || ix_tile == 95)
-				ix_layer[2] = ix_tile;
-			else
-				ix_layer[0] = ix_tile;
-
+			// Sprite
 			if (ix_sprite > 0)
 			{
-				if (ix_sprite == 73)
-					ix_layer[2] = 128 + ix_sprite;
-				else
+				if (TileInfo.GetOrder(TileInfo.TYPE.SPRITE, ix_sprite) <= 0)
 					ix_layer[1] = 128 + ix_sprite;
+				else
+					ix_layer[2] = 128 + ix_sprite;
 			}
 
+			// Tile
+			{
+				if (TileInfo.GetOrder(TileInfo.TYPE.TILE, ix_tile) <= 0)
+					ix_layer[0] = ix_tile;
+				else
+					ix_layer[2] = ix_tile;
+			}
+			
 			for (int layer = 0; layer < _MAX_LAYER; layer++)
 				_tile_renderer[layer][_GetGridIndex(dx, dy)].sprite = (ix_layer[layer] >= 0) ? sprite_list[ix_layer[layer]] : null;
 		}
@@ -216,6 +220,17 @@ public class GridRenderer: MonoBehaviour
 				}
 
 				GameObj.player.SetDiretion(_party_dx, _party_dy);
+
+				int ix = GameObj.map[GameObj.player.Pos.x + _party_dx, GameObj.player.Pos.y + _party_dy];
+				int ix_tile = ix & 0xFFFF;
+				int ix_sprite = (ix >> 16) & 0xFFFF;
+
+				if (TileInfo.GetOrder(TileInfo.TYPE.TILE, ix_tile) == 0 ||
+				    TileInfo.GetOrder(TileInfo.TYPE.SPRITE, ix_sprite) == 0)
+				{
+					// Can't move
+					_grid_pos = _grid_tr.position;
+				}
 			}
 		}
 
