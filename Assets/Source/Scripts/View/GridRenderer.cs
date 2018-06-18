@@ -52,8 +52,8 @@ public class GridRenderer: MonoBehaviour
 		(
 			anchor.transform.position.x,
 			anchor.transform.position.y,
-			anchor.GetComponent<RectTransform>().rect.width,
-			anchor.GetComponent<RectTransform>().rect.height
+			anchor.GetComponent<RectTransform>().rect.width * 2,
+			anchor.GetComponent<RectTransform>().rect.height * 2
 		);
 
 		Vector2 VIEW_CENTER = new Vector2
