@@ -4,6 +4,13 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+public static class CONFIG
+{
+	public const int TARGET_FRAME_RATE = 60;
+
+	public static float GUI_SCALE = 1.0f;
+}
+
 public class MainLoop : MonoBehaviour
 {
 	public Text text_debug_fps;
@@ -12,7 +19,17 @@ public class MainLoop : MonoBehaviour
 
 	void Awake()
 	{
-		// DontDestroyOnLoad(...gameObject);
+		Application.targetFrameRate = CONFIG.TARGET_FRAME_RATE;
+
+		{
+			const double BASE_W = 1600.0;
+			const double BASE_H = 1000.0;
+
+			CONFIG.GUI_SCALE = (float)((BASE_H * Screen.width) / (BASE_W * Screen.height));
+			CONFIG.GUI_SCALE = (CONFIG.GUI_SCALE >= 1.0f) ? 1.0f : CONFIG.GUI_SCALE;
+		}
+
+		Environment.SetEnvironmentVariable("MONO_REFLECTION_SERIALIZER", "yes");
 	}
 
 	void Start()

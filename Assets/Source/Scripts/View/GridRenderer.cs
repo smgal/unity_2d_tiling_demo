@@ -36,7 +36,7 @@ public class GridRenderer: MonoBehaviour
 	private const float TILE_W = 48;
 	private const float TILE_H = 48;
 
-	private const float _SPEED = 1000.0f;
+	private const float _SPEED = 500.0f;
 	private Vector3 _SCALE;
 
 	private Vector3 _grid_pos;
@@ -52,8 +52,8 @@ public class GridRenderer: MonoBehaviour
 		(
 			anchor.transform.position.x,
 			anchor.transform.position.y,
-			anchor.GetComponent<RectTransform>().rect.width * 2,
-			anchor.GetComponent<RectTransform>().rect.height * 2
+			anchor.GetComponent<RectTransform>().rect.width * 1,
+			anchor.GetComponent<RectTransform>().rect.height * 1
 		);
 
 		Vector2 VIEW_CENTER = new Vector2
@@ -69,12 +69,15 @@ public class GridRenderer: MonoBehaviour
 			1
 		);
 
+		_SCALE *= CONFIG.GUI_SCALE;
+
 		{
 			prefab_bg_tile.transform.localScale = _SCALE;
 			prefab_obj_tile.transform.localScale = _SCALE;
 			prefab_fg_tile.transform.localScale = _SCALE;
 		}
-
+		
+		/*
 		{
 			Vector3 pos = anchor.transform.position;
 			pos.z = player.transform.position.z;
@@ -82,6 +85,16 @@ public class GridRenderer: MonoBehaviour
 			player.transform.position = pos;
 
 			player.transform.localScale = _SCALE;
+		}
+		*/
+
+		VIEW_CENTER.x = player.transform.position.x;
+		VIEW_CENTER.y = player.transform.position.y;
+
+		{
+			Vector3 local_position = player.transform.localPosition;
+			local_position.y += 60 * CONFIG.GUI_SCALE;
+			player.transform.localPosition = local_position;
 		}
 
 		LeanPool.Despawn(_tile_container);
