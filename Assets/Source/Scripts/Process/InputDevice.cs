@@ -3,6 +3,7 @@ using System;
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class InputDevice: MonoBehaviour
 {
@@ -46,7 +47,7 @@ public class InputDevice: MonoBehaviour
 
 	////////////////////////////////////////////////////////////////////////////
 
-	public Image m_target_image;
+	public Image target_image;
 
 	private bool _on_pressing = false;
 	private Vector2 _pressed_pos;
@@ -86,16 +87,8 @@ public class InputDevice: MonoBehaviour
 		_pressed_pos = Input.mousePosition;
 		_on_pressing = true;
 
-		//Debug.Log(string.Format("** TouchDown({0},{1})", pos2.x, pos2.y));
-
-		Vector2 local_pos;
-		RectTransformUtility.ScreenPointToLocalPointInRectangle(m_target_image.rectTransform, Input.mousePosition, Camera.main, out local_pos);
-		Vector2 normalized_local_pos = Rect.PointToNormalized(m_target_image.rectTransform.rect, local_pos);
-
-		normalized_local_pos.x -= 0.5f;
-		normalized_local_pos.x *= 2.0f;
-		normalized_local_pos.y -= 0.5f;
-		normalized_local_pos.y *= 2.0f;
+		Vector3 local_pos = target_image.transform.InverseTransformPoint(_pressed_pos.x, _pressed_pos.y, 0.0f);
+		// debug_text.text = String.Format("({0:D3},{1:D3})", (int)local_pos.x, (int)local_pos.y);
 
 		/*  normalized_local_pos
 		 *  
@@ -110,16 +103,16 @@ public class InputDevice: MonoBehaviour
 		 *  (-1,-1)     ( 1,-1)
 		 */
 
-		if (Math.Abs(normalized_local_pos.x) > Math.Abs(normalized_local_pos.y))
+		if (Math.Abs(local_pos.x) > Math.Abs(local_pos.y))
 		{
-			if (normalized_local_pos.x >= 0.0f)
+			if (local_pos.x >= 0.0f)
 				_key_is_pressing[(int)KEY.RIGHT] = true;
 			else
 				_key_is_pressing[(int)KEY.LEFT] = true;
 		}
 		else
 		{
-			if (normalized_local_pos.y >= 0.0f)
+			if (local_pos.y >= 0.0f)
 				_key_is_pressing[(int)KEY.UP] = true;
 			else
 				_key_is_pressing[(int)KEY.DOWN] = true;

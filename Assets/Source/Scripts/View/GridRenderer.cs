@@ -48,25 +48,16 @@ public class GridRenderer: MonoBehaviour
 		Debug.Assert((anchor.transform as RectTransform).pivot.x == 0.5);
 		Debug.Assert((anchor.transform as RectTransform).pivot.y == 0.5);
 
-		Rect VIEW_RECT = new Rect
-		(
-			anchor.transform.position.x,
-			anchor.transform.position.y,
-			anchor.GetComponent<RectTransform>().rect.width * 1,
-			anchor.GetComponent<RectTransform>().rect.height * 1
-		);
-
 		Vector2 VIEW_CENTER = new Vector2
 		(
-			VIEW_RECT.x,
-			VIEW_RECT.y
+			player.transform.position.x,
+			player.transform.position.y
 		);
 
 		_SCALE = new Vector3
 		(
-			VIEW_RECT.width / TILE_W / (2 * NUM_TILES_X_RADIUS + 1),
-			VIEW_RECT.height / TILE_H / (2 * NUM_TILES_Y_RADIUS + 1),
-			1
+			anchor.GetComponent<RectTransform>().rect.width / TILE_W / (2 * NUM_TILES_X_RADIUS + 1),
+			anchor.GetComponent<RectTransform>().rect.height / TILE_H / (2 * NUM_TILES_Y_RADIUS + 1)
 		);
 
 		_SCALE *= CONFIG.GUI_SCALE;
@@ -77,20 +68,6 @@ public class GridRenderer: MonoBehaviour
 			prefab_fg_tile.transform.localScale = _SCALE;
 		}
 		
-		/*
-		{
-			Vector3 pos = anchor.transform.position;
-			pos.z = player.transform.position.z;
-			pos.y += 60;
-			player.transform.position = pos;
-
-			player.transform.localScale = _SCALE;
-		}
-		*/
-
-		VIEW_CENTER.x = player.transform.position.x;
-		VIEW_CENTER.y = player.transform.position.y;
-
 		{
 			Vector3 local_position = player.transform.localPosition;
 			local_position.y += 60 * CONFIG.GUI_SCALE;

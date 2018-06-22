@@ -42,6 +42,7 @@ public class MainLoop : MonoBehaviour
 
 		Controller.Process();
 
+		// Display debugging text
 		{
 			int party_x = GameObj.player.Pos.x;
 			int party_y = GameObj.player.Pos.y;
@@ -58,7 +59,6 @@ public class MainLoop : MonoBehaviour
 
 	void OnApplicationQuit()
 	{
-		Debug.Log("Application ending after " + Time.time + " seconds");
 #if !UNITY_EDITOR
 		Application.CancelQuit();
         System.Diagnostics.Process.GetCurrentProcess().Kill();
