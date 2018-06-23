@@ -55,6 +55,12 @@ public class MainLoop : MonoBehaviour
 
 			text_debug_log.text = String.Format("tile: {0}, sprite: {1}", ix_tile, ix_sprite);
 		}
+
+		if (Input.GetKey(KeyCode.S))
+		{
+			if (Application.isEditor)
+				ScreenCapture.CaptureScreenshot("screen_shot.png");
+		}
 	}
 
 	void OnApplicationQuit()
