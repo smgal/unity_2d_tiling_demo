@@ -8,8 +8,8 @@ public class Player
 
 	public Player()
 	{
-		_pos.x = 10;
-		_pos.y = 10;
+		_pos.x = 8;
+		_pos.y = 13;
 		_faced.dx = 0;
 		_faced.dy = 1;
 	}

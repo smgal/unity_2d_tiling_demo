@@ -153,9 +153,9 @@ public class GridRenderer: MonoBehaviour
 			if (ix_sprite > 0)
 			{
 				if (TileInfo.GetOrder(TileInfo.TYPE.SPRITE, ix_sprite) <= 0)
-					ix_layer[1] = 128 + ix_sprite;
+					ix_layer[1] = 40 + ix_sprite;
 				else
-					ix_layer[2] = 128 + ix_sprite;
+					ix_layer[2] = 40 + ix_sprite;
 			}
 
 			// Tile
