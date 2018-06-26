@@ -9,6 +9,7 @@ public static class CONFIG
 	public const int TARGET_FRAME_RATE = 60;
 
 	public static float GUI_SCALE = 1.0f;
+	public static float OBJECT_Y_OFFSET = 60.0f;
 }
 
 public class MainLoop : MonoBehaviour
@@ -27,6 +28,7 @@ public class MainLoop : MonoBehaviour
 
 			CONFIG.GUI_SCALE = (float)((BASE_H * Screen.width) / (BASE_W * Screen.height));
 			CONFIG.GUI_SCALE = (CONFIG.GUI_SCALE >= 1.0f) ? 1.0f : CONFIG.GUI_SCALE;
+			CONFIG.OBJECT_Y_OFFSET *= CONFIG.GUI_SCALE;
 		}
 
 		Environment.SetEnvironmentVariable("MONO_REFLECTION_SERIALIZER", "yes");

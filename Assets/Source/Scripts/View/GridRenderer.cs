@@ -70,7 +70,7 @@ public class GridRenderer: MonoBehaviour
 		
 		{
 			Vector3 local_position = player.transform.localPosition;
-			local_position.y += 60 * CONFIG.GUI_SCALE;
+			local_position.y += CONFIG.OBJECT_Y_OFFSET;
 			player.transform.localPosition = local_position;
 		}
 
@@ -92,14 +92,17 @@ public class GridRenderer: MonoBehaviour
 			{
 				GameObject prefab_tile = (layer == 0) ? prefab_bg_tile : ((layer == 1) ? prefab_obj_tile : prefab_fg_tile);
 
+				float x_offset = 0.0f;
+				float y_offset = 0.0f; // CONFIG.OBJECT_Y_OFFSET;
+
 				float z = Z_INIT + Z_GAP_LAYER * layer;
 
 				for (int dy = -NUM_TILES_Y_EXTENDED; dy <= NUM_TILES_Y_EXTENDED; dy++)
 				{
 					for (int dx = -NUM_TILES_X_EXTENDED; dx <= NUM_TILES_X_EXTENDED; dx++)
 					{
-						float x = VIEW_CENTER.x + dx * TILE_SCALE.x;
-						float y = VIEW_CENTER.y - dy * TILE_SCALE.y;
+						float x = VIEW_CENTER.x + dx * TILE_SCALE.x + x_offset;
+						float y = VIEW_CENTER.y - dy * TILE_SCALE.y + y_offset;
 
 						var tile = LeanPool.Spawn(prefab_tile);
 						tile.transform.position = new Vector3(x, y, z);
