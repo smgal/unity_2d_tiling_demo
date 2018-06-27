@@ -12,16 +12,17 @@ public class GridRenderer: MonoBehaviour
 	public Animator   player_anim;
 	public GameObject prefab_tile_container;
 	public GameObject prefab_bg_tile;
-	public GameObject prefab_obj_tile;
+	public GameObject prefab_obj_bg_tile;
+	public GameObject prefab_obj_fg_tile;
 	public GameObject prefab_fg_tile;
 
 	public List<Sprite> sprite_list;
 
 	// map renderer
-	private const int _MAX_LAYER = 3;
+	private const int _MAX_LAYER = 4;
 	private GameObject _tile_container;
 	private List<GameObject> _tiles = new List<GameObject>();
-	private List<SpriteRenderer>[] _tile_renderer = new List<SpriteRenderer>[_MAX_LAYER] { new List<SpriteRenderer>(), new List<SpriteRenderer>(), new List<SpriteRenderer>() } ;
+	private List<SpriteRenderer>[] _tile_renderer = new List<SpriteRenderer>[_MAX_LAYER] { new List<SpriteRenderer>(), new List<SpriteRenderer>(), new List<SpriteRenderer>(), new List<SpriteRenderer>() } ;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// 상수 정의
@@ -64,13 +65,14 @@ public class GridRenderer: MonoBehaviour
 
 		{
 			prefab_bg_tile.transform.localScale = _SCALE;
-			prefab_obj_tile.transform.localScale = _SCALE;
+			prefab_obj_bg_tile.transform.localScale = _SCALE;
+			prefab_obj_fg_tile.transform.localScale = _SCALE;
 			prefab_fg_tile.transform.localScale = _SCALE;
 		}
 		
 		{
 			Vector3 local_position = player.transform.localPosition;
-			local_position.y += CONFIG.OBJECT_Y_OFFSET;
+			local_position.y += CONFIG.PLAYER_Y_OFFSET;
 			player.transform.localPosition = local_position;
 		}
 
@@ -90,10 +92,24 @@ public class GridRenderer: MonoBehaviour
 
 			for (int layer = 0; layer < _MAX_LAYER; layer++)
 			{
-				GameObject prefab_tile = (layer == 0) ? prefab_bg_tile : ((layer == 1) ? prefab_obj_tile : prefab_fg_tile);
+				GameObject prefab_tile = null;
+
+				switch (layer)
+				{
+					case 0: prefab_tile = prefab_bg_tile; break;
+					case 1: prefab_tile = prefab_obj_bg_tile; break;
+					case 2: prefab_tile = prefab_obj_fg_tile; break;
+					case 3: prefab_tile = prefab_fg_tile; break;
+					default:
+						Debug.Assert(false);
+						break;
+				}
 
 				float x_offset = 0.0f;
-				float y_offset = 0.0f; // CONFIG.OBJECT_Y_OFFSET;
+				float y_offset = 0.0f;
+
+				if (layer == 1 || layer == 2)
+					y_offset += CONFIG.OBJECT_Y_OFFSET;
 
 				float z = Z_INIT + Z_GAP_LAYER * layer;
 
@@ -150,7 +166,7 @@ public class GridRenderer: MonoBehaviour
 			int ix_tile = ix & 0xFFFF;
 			int ix_sprite = (ix >> 16) & 0xFFFF;
 
-			int[] ix_layer = new int[_MAX_LAYER] { -1, -1, -1 };
+			int[] ix_layer = new int[_MAX_LAYER] { -1, -1, -1, -1 };
 
 			// Sprite
 			if (ix_sprite > 0)
@@ -166,7 +182,7 @@ public class GridRenderer: MonoBehaviour
 				if (TileInfo.GetOrder(TileInfo.TYPE.TILE, ix_tile) <= 0)
 					ix_layer[0] = ix_tile;
 				else
-					ix_layer[2] = ix_tile;
+					ix_layer[3] = ix_tile;
 			}
 			
 			for (int layer = 0; layer < _MAX_LAYER; layer++)
